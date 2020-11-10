@@ -703,6 +703,16 @@ static const uint8_t lowCase_cp866[] PROGMEM
 	'ï',  // KEY_Z
 };
 
+static const uint8_t cp866caps[] PROGMEM
+{
+	0b01111001,
+	0b00000110,
+	0b11100000,
+	0b11111111,
+	0b11111111,
+	0b11111111
+};
+
 static const uint8_t asciiChars_upper[] PROGMEM
 {
 	'~',  // KEY_TILDE
@@ -754,6 +764,16 @@ static const uint8_t asciiChars_upper[] PROGMEM
 	'Z',  // KEY_Z
 };
 
+static const uint8_t asciicaps[] PROGMEM
+{
+	0b00000000,
+	0b00000000,
+	0b11100000,
+	0b11111111,
+	0b11111111,
+	0b11111111
+};
+
 static const uint8_t controlChars[] PROGMEM
 {
 	0,   // KEY_NONE
@@ -787,17 +807,27 @@ KeyboardStream::getScanCode()
 		if (c < KEY_TILDE) { // Printable control characters
 			c = pgm_read_byte(controlChars+c);
 		} else if (c < KEY_F1) { // Printable character
-			bool upperCase =
-			    ((m_flags & FLAGS_SHIFT) && (c < KEY_A)) ||
-			    ((m_flags & FLAGS_SHIFT) && !(m_flags & FLAGS_CAPS) && (c >= KEY_A)) ||
-			    (!(m_flags & FLAGS_SHIFT) && (m_flags & FLAGS_CAPS) && (c >= KEY_A));
 			c -= KEY_TILDE;
 			if (m_flags & FLAGS_LOCALE) { // Locale on
+				uint8_t index = c / 8;
+				index = pgm_read_byte(cp866caps+index);
+				index = (index >> (c % 8)) & 1;
+				bool upperCase =
+				    ((m_flags & FLAGS_SHIFT) && !index) ||
+				    ((m_flags & FLAGS_SHIFT) && !(m_flags & FLAGS_CAPS) && index) ||
+				    (!(m_flags & FLAGS_SHIFT) && (m_flags & FLAGS_CAPS) && index);
 				if (upperCase) {
 					c = pgm_read_byte(upCase_cp866+c);
 				} else
 					c = pgm_read_byte(lowCase_cp866+c);
 			} else { // Locale off
+				uint8_t index = c / 8;
+				index = pgm_read_byte(asciicaps+index);
+				index = (index >> (c % 8)) & 1;
+				bool upperCase =
+				    ((m_flags & FLAGS_SHIFT) && !index) ||
+				    ((m_flags & FLAGS_SHIFT) && !(m_flags & FLAGS_CAPS) && index) ||
+				    (!(m_flags & FLAGS_SHIFT) && (m_flags & FLAGS_CAPS) && index);
 				if (upperCase) {
 					c = pgm_read_byte(asciiChars_upper+c);
 				} else
