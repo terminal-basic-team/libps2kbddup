@@ -7,7 +7,7 @@
             <c-extensions/>
             <cpp-extensions>cpp</cpp-extensions>
             <header-extensions>h</header-extensions>
-            <sourceEncoding>UTF-8</sourceEncoding>
+            <sourceEncoding>IBM866</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>../ps2kbd</sourceRootElem>

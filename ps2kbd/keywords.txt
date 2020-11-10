@@ -6,7 +6,8 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-PS2Keyboard	KEYWORD1
+Keyboard	KEYWORD1
+KeyboardStream	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -15,12 +16,6 @@ PS2Keyboard	KEYWORD1
 #######################################
 # Constants (LITERAL1)
 #######################################
-
-PS2_KC_BREAK	LITERAL1
-PS2_KC_ENTER	LITERAL1
-PS2_KC_ESC	LITERAL1
-PS2_KC_KPLUS	LITERAL1
-PS2_KC_KMINUS	LITERAL1
-PS2_KC_KMULTI	LITERAL1
-PS2_KC_NUM	LITERAL1
-PS2_KC_BKSP	LITERAL1
+KEY_NONE	LITERAL1
+KEY_1	LITERAL1
+KEY_2	LITERAL1
