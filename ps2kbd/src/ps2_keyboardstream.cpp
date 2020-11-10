@@ -30,9 +30,9 @@ namespace PS2
 {
 
 KeyboardStream::KeyboardStream(Keyboard& k) :
+m_flags(FLAGS_NONE),
 m_boundary(k),
 m_head(0),
-m_flags(FLAGS_NONE),
 m_tail(0),
 m_lastChar(0)
 {
