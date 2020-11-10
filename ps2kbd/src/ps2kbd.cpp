@@ -804,7 +804,9 @@ KeyboardStream::getScanCode()
 {
 	uint8_t c = m_boundary.read();
 	if (c < 128) { // key pressed
-		if (c < KEY_TILDE) { // Printable control characters
+		if ((m_flags & FLAGS_CTRL) && (c >= KEY_A && c <= KEY_Z)) {
+			c = c - KEY_A + 1;
+		} else if (c < KEY_TILDE) { // Printable control characters
 			c = pgm_read_byte(controlChars+c);
 		} else if (c < KEY_F1) { // Printable character
 			c -= KEY_TILDE;
@@ -834,8 +836,10 @@ KeyboardStream::getScanCode()
 					c = pgm_read_byte(asciiChars_lower+c);
 			}
 		} else {
-			if (c == KEY_LSHIFT)
+			if (c == KEY_LSHIFT || c == KEY_RSHIFT)
 				m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAGS_SHIFT);
+			else if (c == KEY_LCTRL)
+				m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAGS_CTRL);
 			else if (c == KEY_RCTRL)
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_LOCALE);
 			else if (c == KEY_CAPSLOCK)
@@ -852,8 +856,10 @@ KeyboardStream::getScanCode()
 		}
 	} else {
 		c -= 128;
-		if (c == KEY_LSHIFT)
+		if (c == KEY_LSHIFT || c == KEY_RSHIFT)
 			m_flags = Flags_t((uint8_t)m_flags & (uint8_t)~FLAGS_SHIFT);
+		if (c == KEY_LCTRL)
+			m_flags = Flags_t((uint8_t)m_flags & (uint8_t)~FLAGS_CTRL);
 	}
 }
 
