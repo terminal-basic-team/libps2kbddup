@@ -12,6 +12,9 @@
   #define CORE_INT4_PIN  19
   #define CORE_INT5_PIN  18
 
+// ESP32
+#elif defined(ARDUINO_ARCH_ESP32)
+  #define CORE_INT_EVERY_PIN
 // Arduino Due (untested)
 #elif defined(__SAM3X8E__) 
   #define CORE_INT_EVERY_PIN
