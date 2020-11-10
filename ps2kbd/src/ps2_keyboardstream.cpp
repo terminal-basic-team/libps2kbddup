@@ -32,6 +32,7 @@ namespace PS2
 KeyboardStream::KeyboardStream(Keyboard& k) :
 m_boundary(k),
 m_head(0),
+m_flags(FLAGS_NONE),
 m_tail(0),
 m_lastChar(0)
 {
@@ -375,10 +376,23 @@ KeyboardStream::getScanCode()
 				m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAGS_SHIFT);
 			else if (c == KEY_LCTRL)
 				m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAGS_CTRL);
-			else if (c == KEY_RCTRL)
+			else if (c == KEY_RCTRL) {
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_LOCALE);
-			else if (c == KEY_CAPSLOCK)
+				uint8_t byt = 0;
+				if (m_flags & FLAGS_CAPS)
+					byt |= 4;
+				if (m_flags & FLAGS_LOCALE)
+					byt |= 1;
+				m_boundary.setLeds(byt);
+			} else if (c == KEY_CAPSLOCK) {
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_CAPS);
+				uint8_t byt = 0;
+				if (m_flags & FLAGS_CAPS)
+					byt |= 4;
+				if (m_flags & FLAGS_LOCALE)
+					byt |= 1;
+				m_boundary.setLeds(byt);
+			}
 			return;
 		}
 

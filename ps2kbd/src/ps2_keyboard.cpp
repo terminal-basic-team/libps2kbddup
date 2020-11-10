@@ -67,7 +67,9 @@ namespace PS2
 static volatile uint8_t buffer[BUFFER_SIZE];
 static volatile uint8_t head, tail;
 static uint8_t DataPin;
+static uint8_t ClockPin;
 static uint8_t CharBuffer = 0;
+static uint8_t irq_num;
 
 // The ISR for the external interrupt
 
@@ -102,6 +104,144 @@ Keyboard::ps2interrupt()
 		}
 		bitcount = 0;
 		incoming = 0;
+	}
+}
+
+void
+Keyboard::setLeds(uint8_t v)
+{
+	detachInterrupt(irq_num);
+	
+	this->sendByte(0xED);
+	this->sendByte(v);
+	
+	this->attachInterrupt();
+}
+
+void
+Keyboard::setOutput()
+{
+	// initialize the pins
+#ifdef INPUT_PULLUP
+	pinMode(ClockPin, INPUT_PULLUP);
+	pinMode(DataPin, INPUT_PULLUP);
+#else
+	pinMode(ClockPin, INPUT);
+	digitalWrite(ClockPin, HIGH);
+	pinMode(DataPin, INPUT);
+	digitalWrite(DataPin, HIGH);
+#endif
+}
+
+void
+Keyboard::sendByte(uint8_t byt)
+{
+	pinMode(ClockPin, OUTPUT);
+	pinMode(DataPin, OUTPUT);
+	
+	// 1. Bring the Clock line low for at least 100 microseconds
+	digitalWrite(ClockPin, LOW);
+	delayMicroseconds(150);
+	// 2. Bring the Data line low.
+	digitalWrite(DataPin, LOW);
+	// 3. Release the Clock line.
+	pinMode(ClockPin, INPUT);
+	digitalWrite(ClockPin, HIGH);
+	
+	bool clock[128];
+	//for (uint8_t i=0; i<128; ++i)
+	//	clock[i] = digitalRead(ClockPin);
+	
+	//for (uint8_t i=0; i<128; ++i)
+	//	Serial.print(clock[i], HEX);
+	
+	// 4. Wait for the device to bring the Clock line low. 
+	uint8_t tries = 128;
+	while (digitalRead(ClockPin)) {
+		clock[128 - tries] = digitalRead(ClockPin);
+		if (tries-- == 0) {
+			Serial.println("No clock reaction 4");
+			for (uint8_t i=0; i<128; ++i)
+				Serial.print(clock[i], HEX);
+			return;
+		}
+	}
+	uint8_t bits = 0;
+	for (uint8_t i=0; i<8; ++i) {
+		const uint8_t bit = (byt >> i) & 1;
+		bits += bit;
+		digitalWrite(DataPin, bit);
+		tries = 128;
+		while (!digitalRead(ClockPin)) {
+			if (tries-- == 0) {
+				Serial.print("No clock reaction 6 ");
+				Serial.println(i, DEC);
+				return;
+			}
+		}
+		tries = 128;
+		while (digitalRead(ClockPin)) {
+			if (tries-- == 0) {
+				Serial.print("No clock reaction 7 ");
+				Serial.println(i, DEC);
+				return;
+			}
+		}
+	}
+	
+	// Parity bit
+	
+	bits = bits % 2 ? 0 : 1;
+	digitalWrite(DataPin, bits);
+	tries = 128;
+	while (!digitalRead(ClockPin)) {
+		if (tries-- == 0) {
+			Serial.println("No clock reaction 6 parity");
+			return;
+		}
+	}
+	tries = 128;
+	while (digitalRead(ClockPin)) {
+		if (tries-- == 0) {
+			Serial.println("No clock reaction 7 parity");
+			return;
+		}
+	}
+	
+	// 9. Release the Data line.
+	pinMode(DataPin, INPUT);
+	digitalWrite(DataPin, HIGH);
+	
+	// 10. Wait for the device to bring the Data line low. 
+	tries = 128;
+	while (digitalRead(DataPin)) {
+		if (tries-- == 0) {
+			Serial.println("No data reaction");
+			return;
+		}
+	}
+	// 11. Wait for the device to bring the Clock line low. 
+	tries = 128;
+	while (digitalRead(ClockPin)) {
+		if (tries-- == 0) {
+			Serial.println("No clock reaction 11");
+			return;
+		}
+	}
+	
+	tries = 128;
+	while (!digitalRead(DataPin)) {
+		if (tries-- == 0) {
+			Serial.println("No data reaction");
+			return;
+		}
+	}
+	tries = 128;
+	while (!digitalRead(ClockPin)) {
+		if (tries-- == 0) {
+			Serial.println("No clock reaction");
+			return;
+		}
 	}
 }
 
@@ -342,28 +482,15 @@ m_flags(FLAG_NONE)
 }
 
 void
-Keyboard::begin(uint8_t data_pin, uint8_t irq_pin)
+Keyboard::attachInterrupt()
 {
-	uint8_t irq_num = 255;
-
-	DataPin = data_pin;
-
-	// initialize the pins
-#ifdef INPUT_PULLUP
-	pinMode(irq_pin, INPUT_PULLUP);
-	pinMode(data_pin, INPUT_PULLUP);
-#else
-	pinMode(irq_pin, INPUT);
-	digitalWrite(irq_pin, HIGH);
-	pinMode(data_pin, INPUT);
-	digitalWrite(data_pin, HIGH);
-#endif
-
+	irq_num = 255;
+	
 #ifdef CORE_INT_EVERY_PIN
-	irq_num = irq_pin;
+	irq_num = ClockPin;
 
 #else
-	switch (irq_pin) {
+	switch (ClockPin) {
 #ifdef CORE_INT0_PIN
 	case CORE_INT0_PIN:
 		irq_num = 0;
@@ -487,11 +614,23 @@ Keyboard::begin(uint8_t data_pin, uint8_t irq_pin)
 	}
 #endif
 
+	if (irq_num < 255) {
+		::attachInterrupt(irq_num, ps2interrupt, FALLING);
+	}
+}
+
+void
+Keyboard::begin(uint8_t data_pin, uint8_t irq_pin)
+{
+	DataPin = data_pin;
+	ClockPin = irq_pin;
+
+	setOutput();
+	
+	this->attachInterrupt();
+	
 	head = 0;
 	tail = 0;
-	if (irq_num < 255) {
-		attachInterrupt(irq_num, ps2interrupt, FALLING);
-	}
 }
 
 } // namespace PS2
