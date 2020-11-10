@@ -6,8 +6,10 @@
         <logicalFolder name="utility" displayName="utility" projectFiles="true">
           <itemPath>../ps2kbd/src/utility/int_pins.h</itemPath>
         </logicalFolder>
-        <itemPath>../ps2kbd/src/ps2kbd.cpp</itemPath>
-        <itemPath>../ps2kbd/src/ps2kbd.h</itemPath>
+        <itemPath>../ps2kbd/src/ps2_keyboard.cpp</itemPath>
+        <itemPath>../ps2kbd/src/ps2_keyboard.hpp</itemPath>
+        <itemPath>../ps2kbd/src/ps2_keyboardstream.cpp</itemPath>
+        <itemPath>../ps2kbd/src/ps2_keyboardstream.hpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -55,9 +57,25 @@
           <ranlibTool>avr-gcc-ranlib</ranlibTool>
         </archiverTool>
       </compileType>
-      <item path="../ps2kbd/src/ps2kbd.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../ps2kbd/src/ps2_keyboard.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="../ps2kbd/src/ps2kbd.h" ex="false" tool="3" flavor2="0">
+      <item path="../ps2kbd/src/ps2_keyboard.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../ps2kbd/src/ps2_keyboardstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../ps2kbd/src/ps2_keyboardstream.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../ps2kbd/src/utility/int_pins.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -84,9 +102,25 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="../ps2kbd/src/ps2kbd.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../ps2kbd/src/ps2_keyboard.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="../ps2kbd/src/ps2kbd.h" ex="false" tool="3" flavor2="0">
+      <item path="../ps2kbd/src/ps2_keyboard.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../ps2kbd/src/ps2_keyboardstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../ps2kbd/src/ps2_keyboardstream.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../ps2kbd/src/utility/int_pins.h" ex="false" tool="3" flavor2="0">
       </item>
