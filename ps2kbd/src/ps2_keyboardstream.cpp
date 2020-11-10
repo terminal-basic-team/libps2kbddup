@@ -86,6 +86,20 @@ KeyboardStream::getChar()
 	return c;
 }
 
+void
+KeyboardStream::updateLeds()
+{
+	uint8_t byt = 0;
+	if (m_flags & FLAGS_CAPS)
+		byt |= 4;
+	if (m_flags & FLAGS_LOCALE)
+		byt |= 1;
+	if (m_flags & FLAGS_NUM)
+		byt |= 2;
+	m_boundary.setLeds(byt);
+}
+
+
 static const uint8_t asciiChars_lower[] PROGMEM
 {
 	'`',  // KEY_TILDE
@@ -376,11 +390,12 @@ KeyboardStream::getScanCode()
 				m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAGS_SHIFT);
 			else if (c == KEY_LCTRL)
 				m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAGS_CTRL);
-			else if (c == KEY_RCTRL) {
+			else if (c == KEY_RCTRL)
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_LOCALE);
-			} else if (c == KEY_CAPSLOCK) {
+			else if (c == KEY_CAPSLOCK)
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_CAPS);
-			}
+			else if (c == KEY_NUMLOCK)
+				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_NUM);
 			return;
 		}
 
@@ -397,21 +412,10 @@ KeyboardStream::getScanCode()
 			m_flags = Flags_t((uint8_t)m_flags & (uint8_t)~FLAGS_SHIFT);
 		else if (c == KEY_LCTRL)
 			m_flags = Flags_t((uint8_t)m_flags & (uint8_t)~FLAGS_CTRL);
-		else if (c == KEY_RCTRL) {
-			uint8_t byt = 0;
-			if (m_flags & FLAGS_CAPS)
-				byt |= 4;
-			if (m_flags & FLAGS_LOCALE)
-				byt |= 1;
-			m_boundary.setLeds(byt);
-		} else if (c == KEY_CAPSLOCK) {
-			uint8_t byt = 0;
-			if (m_flags & FLAGS_CAPS)
-				byt |= 4;
-			if (m_flags & FLAGS_LOCALE)
-				byt |= 1;
-			m_boundary.setLeds(byt);
-		}
+		else if (c == KEY_RCTRL ||
+			 c == KEY_CAPSLOCK ||
+			 c == KEY_NUMLOCK)
+			updateLeds();
 	}
 }
 

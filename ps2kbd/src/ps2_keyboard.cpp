@@ -79,19 +79,38 @@ Keyboard::ps2interrupt()
 	static uint8_t bitcount = 0;
 	static uint8_t incoming = 0;
 	static uint32_t prev_ms = 0;
+	static uint8_t onesCount = 0;
 	uint32_t now_ms;
 	uint8_t n, val;
 
+	// Read data bit
 	val = digitalRead(DataPin);
+	
+	// Check delay
 	now_ms = millis();
 	if (now_ms - prev_ms > 50) {
 		bitcount = 0;
 		incoming = 0;
 	}
+	
+	// Update last clock time
 	prev_ms = now_ms;
+	// Data bit index
 	n = bitcount - 1;
-	if (n < 8)
+	// First data bit: reset parity counter
+	if (n == 0)
+		onesCount = 0;
+	if (n < 8) {
+		onesCount += val ? 1 : 0;
 		incoming |= (val << n);
+	}
+	// Parity bit: check
+	if (n == 8) {
+		if (val != (onesCount % 2 ? 0 : 1)) {
+			bitcount = 0;
+			incoming = 0;
+		}
+	}
 	
 	bitcount++;
 	if (bitcount == 11) {
@@ -208,26 +227,22 @@ Keyboard::sendByte(uint8_t byt)
 	digitalWrite(DataPin, HIGH);
 	
 	// 10. Wait for the device to bring the Data line low. 
-	tries = 128;
-	while (digitalRead(DataPin)) {
-		if (tries-- == 0) {
-			Serial.println("No data reaction");
-			return;
-		}
+	if (!waitPinState(DataPin, LOW)) {
+		Serial.println("No data reaction");
+		return;
 	}
+
 	// 11. Wait for the device to bring the Clock line low. 
 	if (!waitPinState(ClockPin, LOW)) {
 		Serial.println("No clock reaction 11");
 		return;
 	}
 	
-	tries = 128;
-	while (!digitalRead(DataPin)) {
-		if (tries-- == 0) {
-			Serial.println("No data reaction");
-			return;
-		}
+	if (!waitPinState(DataPin, HIGH)) {
+		Serial.println("No data reaction");
+		return;
 	}
+	
 	if (!waitPinState(ClockPin, HIGH)) {
 		Serial.println("No clock reaction");
 		return;
