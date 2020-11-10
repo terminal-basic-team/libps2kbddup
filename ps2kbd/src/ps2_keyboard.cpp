@@ -55,7 +55,6 @@
  * Library object returns phisical key codes with the flag of press/depress
  */
 
-#include <avr/pgmspace.h>
 #include <string.h>
 
 #include "ps2_keyboard.hpp"
