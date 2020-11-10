@@ -262,34 +262,12 @@ static const uint8_t scancodes1[] PROGMEM =
 	KEY_NUM9,   // 7D
 	KEY_SCROLLC,// 7E
 	KEY_NONE,   // 7F
+	KEY_NONE,   // 80
+	KEY_NONE,   // 81
+	KEY_NONE,   // 82
+	KEY_F7,     // 83
+	KEY_NONE,   // 84
 };
-/*
-static const uint8_t scancodes2[] PROGMEM =
-{
-	KEY_NONE,  // 00
-	KEY_NONE,    // 01
-	KEY_NONE,  // 02
-	KEY_NONE,    // 03
-	KEY_NONE,    // 04
-	KEY_NONE,    // 05
-	KEY_NONE,    // 06
-	KEY_NONE,   // 07
-	KEY_NONE,  // 08
-	KEY_NONE,   // 09
-	KEY_NONE,    // 0A
-	KEY_NONE,    // 0B
-	KEY_NONE,    // 0C
-	KEY_NONE,   // 0D
-	KEY_NONE, // 0E
-	KEY_NONE,  // 0F
-	KEY_NONE,  // 10
-	KEY_RALT,  // 11
-	KEY_NONE,// 12
-	KEY_NONE,  // 13
-	KEY_RCTRL, // 14
-	KEY_NONE,     // 15
-	KEY_NONE,     // 16	
-};*/
 
 static uint8_t
 getNext()

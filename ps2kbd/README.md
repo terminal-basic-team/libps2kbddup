@@ -1,7 +1,9 @@
 #PS/2 Keyboard Library#
 
-PS2Keyboard allows you to use a keyboard for user input. 
+PS2KBD allows you to use a keyboard for user input.
 
-http://www.pjrc.com/teensy/td_libs_PS2Keyboard.html
+This library based on standard Arduino PS2Keybopard library, but contains
+separate classes for reading key press/depress events and parsing the charcodes from that
+events
 
-![](http://www.pjrc.com/teensy/td_libs_PS2Keyboard.jpg)
+The project repository is hosted at https://bitbucket.org/starling13/libps2
