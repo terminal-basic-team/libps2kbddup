@@ -18,7 +18,7 @@
                     <type>3</type>
                 </confElem>
                 <confElem>
-                    <name>Release</name>
+                    <name>Arduino_PRO328</name>
                     <type>3</type>
                 </confElem>
             </confList>
