@@ -1,0 +1,6 @@
+syntax: glob
+*/private/*
+*/build/*
+*/dist/*
+*.bash
+*.mk

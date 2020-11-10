@@ -1,0 +1,16 @@
+{
+  "name": "ps2kbd",
+  "keywords": "keyboard, emulation",
+  "description": "PS2Keyboard (PS/2) allows you to use a keyboard for user input",
+  "repository":
+  {
+    "type": "mercurial",
+    "url": "https://bitbucket.org/starling13/libps2"
+  },
+  "frameworks": "arduino",
+  "platforms":
+  [
+    "atmelavr",
+    "teensy"
+  ]
+}
