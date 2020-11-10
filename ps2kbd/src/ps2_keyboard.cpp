@@ -60,6 +60,9 @@
 
 #include "ps2_keyboard.hpp"
 
+#define _DEBUG 0
+
+
 namespace PS2
 {
 
@@ -91,6 +94,9 @@ Keyboard::ps2interrupt()
 	if (now_ms - prev_ms > 50) {
 		bitcount = 0;
 		incoming = 0;
+#if _DEBUG
+		Serial.println("Timeout");
+#endif
 	}
 	
 	// Update last clock time
@@ -98,9 +104,12 @@ Keyboard::ps2interrupt()
 	// Data bit index
 	n = bitcount - 1;
 	// First data bit: reset parity counter
-	if (n == 0)
+	if (n == 0) {
 		onesCount = 0;
-	if (n < 8) {
+#if _DEBUG
+		Serial.println("New Byte started");
+#endif
+	} if (n < 8) {
 		onesCount += val ? 1 : 0;
 		incoming |= (val << n);
 	}
@@ -109,6 +118,9 @@ Keyboard::ps2interrupt()
 		if (val != (onesCount % 2 ? 0 : 1)) {
 			bitcount = 0;
 			incoming = 0;
+#if _DEBUG
+			Serial.println("Bad parity");
+#endif
 		}
 	}
 	
@@ -134,10 +146,9 @@ Keyboard::setLeds(uint8_t v)
 	this->sendByte(0xED);
 	this->sendByte(v);
 	
-	m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAG_COMMAND_RESPOND);
-	
 	delay(50);
 	
+	this->setOutput();
 	this->attachInterrupt();
 }
 
@@ -186,7 +197,9 @@ Keyboard::sendByte(uint8_t byt)
 	
 	// 4. Wait for the device to bring the Clock line low. 
 	if (!waitPinState(ClockPin, LOW)) {
+#if _DEBUG
 		Serial.println("No clock reaction 4");
+#endif
 		return;
 	}
 	
@@ -197,13 +210,17 @@ Keyboard::sendByte(uint8_t byt)
 		bits += bit;
 		digitalWrite(DataPin, bit);
 		if (!waitPinState(ClockPin, HIGH)) {
+#if _DEBUG
 			Serial.print("No clock reaction 6 ");
 			Serial.println(i, DEC);
+#endif
 			return;
 		}
 		if (!waitPinState(ClockPin, LOW)) {
+#if _DEBUG
 			Serial.print("No clock reaction 7 ");
 			Serial.println(i, DEC);
+#endif
 			return;
 		}
 	}
@@ -214,11 +231,15 @@ Keyboard::sendByte(uint8_t byt)
 	digitalWrite(DataPin, bits);
 	
 	if (!waitPinState(ClockPin, HIGH)) {
+#if _DEBUG
 		Serial.println("No clock reaction 6 parity");
+#endif
 		return;
 	}
 	if (!waitPinState(ClockPin, LOW)) {
+#if _DEBUG
 		Serial.println("No clock reaction 7 parity");
+#endif
 		return;
 	}
 	
@@ -228,23 +249,31 @@ Keyboard::sendByte(uint8_t byt)
 	
 	// 10. Wait for the device to bring the Data line low. 
 	if (!waitPinState(DataPin, LOW)) {
+#if _DEBUG
 		Serial.println("No data reaction");
+#endif
 		return;
 	}
 
 	// 11. Wait for the device to bring the Clock line low. 
 	if (!waitPinState(ClockPin, LOW)) {
+#if _DEBUG
 		Serial.println("No clock reaction 11");
+#endif
 		return;
 	}
 	
 	if (!waitPinState(DataPin, HIGH)) {
+#if _DEBUG
 		Serial.println("No data reaction");
+#endif
 		return;
 	}
 	
 	if (!waitPinState(ClockPin, HIGH)) {
+#if _DEBUG
 		Serial.println("No clock reaction");
+#endif
 		return;
 	}
 }
@@ -271,11 +300,6 @@ Keyboard::available()
 	if (CharBuffer)
 		return true;
 	CharBuffer = get_scan_code();
-	if (CharBuffer && (m_flags & FLAG_COMMAND_RESPOND)) {
-		m_flags = Flags_t((uint8_t)m_flags &
-		    ~(uint8_t)FLAG_COMMAND_RESPOND);
-		CharBuffer = '\0';
-	}
 	if (CharBuffer)
 		return true;
 	return false;
@@ -426,12 +450,7 @@ Keyboard::getNext()
 		CharBuffer = 0;
 		return c;
 	}
-	uint8_t c = get_scan_code();
-	if (c != 0 && (m_flags & FLAG_COMMAND_RESPOND)) {
-		m_flags = Flags_t((uint8_t)m_flags &
-		    ~(uint8_t)FLAG_COMMAND_RESPOND);
-		c = '\0';
-	}
+	const uint8_t c = get_scan_code();
 	return c;
 }
 
@@ -490,8 +509,7 @@ Keyboard::read()
 	return result;
 }
 
-Keyboard::Keyboard() :
-m_flags(FLAG_NONE)
+Keyboard::Keyboard()
 {
 	// nothing to do here, begin() does it all
 }
@@ -641,11 +659,9 @@ Keyboard::begin(uint8_t data_pin, uint8_t irq_pin)
 	ClockPin = irq_pin;
 
 	this->sendByte(0xFF);
-	m_flags = Flags_t((uint8_t)m_flags | (uint8_t)FLAG_COMMAND_RESPOND);
-	delay(1);
+	delay(50);	
 	
 	setOutput();
-	
 	this->attachInterrupt();
 	
 	head = 0;

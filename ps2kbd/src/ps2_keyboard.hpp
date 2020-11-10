@@ -191,15 +191,6 @@ private:
 	void sendByte(uint8_t);
 	
 	bool waitPinState(uint8_t, int);
-	
-	enum Flags_t : uint8_t
-	{
-		FLAG_NONE = 0,
-		FLAG_EXTRACODE = 1<<0,
-		FLAG_COMMAND_RESPOND = 1<<7
-	};
-	
-	Flags_t m_flags;
 };
 
 } // namespace PS2
