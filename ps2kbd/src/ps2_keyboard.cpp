@@ -76,6 +76,9 @@ static uint8_t irq_num;
 // The ISR for the external interrupt
 
 void
+#ifdef ARDUINO_ARCH_ESP32
+IRAM_ATTR
+#endif
 Keyboard::ps2interrupt()
 {
 	static uint8_t bitcount = 0;
