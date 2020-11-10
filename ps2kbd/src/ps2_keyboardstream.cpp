@@ -32,6 +32,7 @@ namespace PS2
 KeyboardStream::KeyboardStream(Keyboard& k) :
 m_boundary(k),
 m_head(0),
+m_flags(FLAGS_NONE),
 m_tail(0),
 m_lastChar(0)
 {
@@ -84,6 +85,20 @@ KeyboardStream::getChar()
 	
 	return c;
 }
+
+void
+KeyboardStream::updateLeds()
+{
+	uint8_t byt = 0;
+	if (m_flags & FLAGS_CAPS)
+		byt |= 4;
+	if (m_flags & FLAGS_LOCALE)
+		byt |= 1;
+	if (m_flags & FLAGS_NUM)
+		byt |= 2;
+	m_boundary.setLeds(byt);
+}
+
 
 static const uint8_t asciiChars_lower[] PROGMEM
 {
@@ -379,6 +394,8 @@ KeyboardStream::getScanCode()
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_LOCALE);
 			else if (c == KEY_CAPSLOCK)
 				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_CAPS);
+			else if (c == KEY_NUMLOCK)
+				m_flags = Flags_t((uint8_t)m_flags ^ (uint8_t)FLAGS_NUM);
 			return;
 		}
 
@@ -393,8 +410,12 @@ KeyboardStream::getScanCode()
 		c -= 128;
 		if (c == KEY_LSHIFT || c == KEY_RSHIFT)
 			m_flags = Flags_t((uint8_t)m_flags & (uint8_t)~FLAGS_SHIFT);
-		if (c == KEY_LCTRL)
+		else if (c == KEY_LCTRL)
 			m_flags = Flags_t((uint8_t)m_flags & (uint8_t)~FLAGS_CTRL);
+		else if (c == KEY_RCTRL ||
+			 c == KEY_CAPSLOCK ||
+			 c == KEY_NUMLOCK)
+			updateLeds();
 	}
 }
 

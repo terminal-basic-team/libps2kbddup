@@ -145,6 +145,7 @@ enum Keys : uint8_t
  */
 class Keyboard
 {
+	friend class KeyboardStream;
 public:
 	/**
 	 * This constructor does basically nothing. Please call the begin(int,int)
@@ -175,17 +176,21 @@ public:
 	 */
 	uint8_t read();
 	
+	void setLeds(uint8_t);
+	
 private:
 	
 	static void ps2interrupt();
 	
-	enum Flags_t : uint8_t
-	{
-		FLAG_NONE = 0,
-		FLAG_EXTRACODE = 1<<0
-	};
+	void attachInterrupt();
 	
-	Flags_t m_flags;
+	void setOutput();
+	
+	uint8_t getNext();
+	
+	void sendByte(uint8_t);
+	
+	bool waitPinState(uint8_t, int);
 };
 
 } // namespace PS2

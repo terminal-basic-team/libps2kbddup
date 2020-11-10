@@ -61,6 +61,8 @@ private:
 	
 	uint8_t getChar();
 	
+	void updateLeds();
+	
 	Flags_t m_flags;
 	
 	Keyboard& m_boundary;

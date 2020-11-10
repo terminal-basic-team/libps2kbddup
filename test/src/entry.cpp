@@ -1,6 +1,6 @@
 #include "ps2_keyboardstream.hpp"
 
-#define DATA_PIN 5
+#define DATA_PIN 3
 #define CLK_PIN 2
 
 PS2::Keyboard kbd;

@@ -224,6 +224,11 @@ program_Arduino_mega2560_tvout : ARCH=arduinoMEGA
 program_Arduino_mega2560_tvout : UCARCH=atmega2560
 program_Arduino_mega2560_tvout : PROGRAMMER=wiring
 program_Arduino_mega2560_tvout : program_common
+	
+program_Arduino_pro328p : ARCH=arduinoPRO
+program_Arduino_pro328p : UCARCH=atmega328p
+program_Arduino_pro328p : PROGRAMMER=usbasp
+program_Arduino_pro328p : program_common
 
 copy:
 	${OBJCOPY} -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load \
@@ -236,10 +241,10 @@ copy:
 	${SIZE} -C --mcu=${UCARCH} ${CND_ARTIFACT_PATH_${CONF}}
 
 program_common:
-	${AVRDUDE} -C ${AVRDUDE_CONF} -v -c ${PROGRAMMER} -p ${UCARCH} \
-	  -P /dev/ttyUSB0 -b57600 -U flash:w:"${CND_ARTIFACT_PATH_${CONF}}_${VERSION}_${ARCH}-${UCARCH}.hex":i
 	#${AVRDUDE} -C ${AVRDUDE_CONF} -v -c ${PROGRAMMER} -p ${UCARCH} \
-	#  -U flash:w:"${CND_ARTIFACT_PATH_${CONF}}_${VERSION}_${ARCH}-${UCARCH}.hex":i
+	#  -P /dev/ttyUSB0 -b57600 -U flash:w:"${CND_ARTIFACT_PATH_${CONF}}_${VERSION}_${ARCH}-${UCARCH}.hex":i
+	${AVRDUDE} -C ${AVRDUDE_CONF} -v -c ${PROGRAMMER} -p ${UCARCH} \
+	  -U flash:w:"${CND_ARTIFACT_PATH_${CONF}}_${VERSION}_${ARCH}-${UCARCH}.hex":i
 	#${AVRDUDE} -C ${AVRDUDE_CONF} -v -c arduino -p m328p -P /dev/ttyUSB0 \
 	#-U flash:w:"${CND_ARTIFACT_PATH_${CONF}}_${VERSION}_${ARCH}-${UCARCH}.hex":i
 	#${AVRDUDE} -C ${AVRDUDE_CONF} -v -c usbasp -p m328p \

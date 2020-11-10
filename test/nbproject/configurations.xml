@@ -661,6 +661,7 @@
             <pElem>../../libarduinoext/include</pElem>
             <pElem>${ARDUINO_PATH}/libraries/TVoutfonts</pElem>
             <pElem>${ARDUINO_PATH}/libraries/TVout</pElem>
+            <pElem>../ps2kbd/src</pElem>
           </incDir>
           <incFile>
             <pElem>Arduino.h</pElem>
@@ -678,6 +679,18 @@
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/basic</output>
           <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../libps2_nb"
+                            CT="3"
+                            CN="Arduino_PRO328"
+                            AC="true"
+                            BL="true"
+                            WD="../libps2_nb"
+                            BC="${MAKE}  -f Makefile CONF=Arduino_PRO328"
+                            CC="${MAKE}  -f Makefile CONF=Arduino_PRO328 clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibps2_nb.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
             <linkerLibProjectItem>
               <makeArtifact PL="../../libarduino"
                             CT="3"
