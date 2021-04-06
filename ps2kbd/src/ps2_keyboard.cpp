@@ -6,7 +6,7 @@
  ** Mostly rewritten Paul Stoffregen <paul@pjrc.com> 2010, 2011
  ** Modified for use beginning with Arduino 13 by L. Abraham Smith, <n3bah@microcompdesign.com> * 
  ** Modified for easy interrup pin assignement on method begin(datapin,irq_pin). Cuningan <cuninganreset@gmail.com> **
- ** Modified by Andrey V. Skvortsov 2019: Library main object reads only the scan
+ ** Modified by Andrey V. Skvortsov 2019-2021: Library main object reads only the scan
  *    codes, needs to use external scan-code to char-code parser library
 
   for more infoCopyright (c) 2007 Free Software Foundation.  All right reserved.rmation you can read the original wiki in arduino.cc
@@ -52,7 +52,7 @@
 
 /*
  * Version ps2kbd-1.0
- * Library object returns phisical key codes with the flag of press/depress
+ * Library object returns phisical key codes with the flag of press/release
  */
 
 #include <string.h>
@@ -60,7 +60,6 @@
 #include "ps2_keyboard.hpp"
 
 #define _DEBUG 0
-
 
 namespace PS2
 {
@@ -90,7 +89,7 @@ Keyboard::ps2interrupt()
 
 	// Read data bit
 	val = digitalRead(DataPin);
-	
+
 	// Check delay
 	now_ms = millis();
 	if (now_ms - prev_ms > 50) {
@@ -100,7 +99,7 @@ Keyboard::ps2interrupt()
 		Serial.println("Timeout");
 #endif
 	}
-	
+
 	// Update last clock time
 	prev_ms = now_ms;
 	// Data bit index
@@ -125,7 +124,7 @@ Keyboard::ps2interrupt()
 #endif
 		}
 	}
-	
+
 	bitcount++;
 	if (bitcount == 11) {
 		uint8_t i = head + 1;
@@ -144,12 +143,12 @@ void
 Keyboard::setLeds(uint8_t v)
 {
 	detachInterrupt(irq_num);
-	
+
 	this->sendByte(0xED);
 	this->sendByte(v);
-	
+
 	delay(50);
-	
+
 	this->setOutput();
 	this->attachInterrupt();
 }
@@ -185,7 +184,7 @@ Keyboard::sendByte(uint8_t byt)
 {
 	pinMode(ClockPin, OUTPUT);
 	pinMode(DataPin, OUTPUT);
-	
+
 	// 1. Bring the Clock line low for at least 100 microseconds
 	digitalWrite(ClockPin, LOW);
 	delayMicroseconds(150);
@@ -194,9 +193,9 @@ Keyboard::sendByte(uint8_t byt)
 	// 3. Release the Clock line.
 	pinMode(ClockPin, INPUT);
 	digitalWrite(ClockPin, HIGH);
-	
+
 	//delayMicroseconds(3);
-	
+
 	// 4. Wait for the device to bring the Clock line low. 
 	if (!waitPinState(ClockPin, LOW)) {
 #if _DEBUG
@@ -204,7 +203,7 @@ Keyboard::sendByte(uint8_t byt)
 #endif
 		return;
 	}
-	
+
 	uint8_t bits = 0;
 	uint8_t tries;
 	for (uint8_t i=0; i<8; ++i) {
@@ -226,9 +225,9 @@ Keyboard::sendByte(uint8_t byt)
 			return;
 		}
 	}
-	
+
 	// Parity bit
-	
+
 	bits = bits % 2 ? 0 : 1;
 	digitalWrite(DataPin, bits);
 	
@@ -244,11 +243,11 @@ Keyboard::sendByte(uint8_t byt)
 #endif
 		return;
 	}
-	
+
 	// 9. Release the Data line.
 	pinMode(DataPin, INPUT);
 	digitalWrite(DataPin, HIGH);
-	
+
 	// 10. Wait for the device to bring the Data line low. 
 	if (!waitPinState(DataPin, LOW)) {
 #if _DEBUG
@@ -307,141 +306,142 @@ Keyboard::available()
 	return false;
 }
 
+// Scancodes o keycodes convertion table
 static const uint8_t scancodes1[] PROGMEM =
 {
-	KEY_NONE,   // 00
-	KEY_F9,     // 01
-	KEY_NONE,   // 02
-	KEY_F5,     // 03
-	KEY_F3,     // 04
-	KEY_F1,     // 05
-	KEY_F2,     // 06
-	KEY_F12,    // 07
-	KEY_NONE,   // 08
-	KEY_F10,    // 09
-	KEY_F8,     // 0A
-	KEY_F6,     // 0B
-	KEY_F4,     // 0C
-	KEY_TAB,    // 0D
-	KEY_TILDE,  // 0E
-	KEY_NONE,   // 0F
-	KEY_NONE,   // 10
-	KEY_LALT,   // 11
-	KEY_LSHIFT, // 12
-	KEY_NONE,   // 13
-	KEY_LCTRL,  // 14
-	KEY_Q,      // 15
-	KEY_1,      // 16
-	KEY_NONE,   // 17
-	KEY_NONE,   // 18
-	KEY_NONE,   // 19
-	KEY_Z,      // 1A
-	KEY_S,      // 1B
-	KEY_A,      // 1C
-	KEY_W,      // 1D
-	KEY_2,      // 1E
-	KEY_NONE,   // 1F
-	KEY_NONE,   // 20
-	KEY_C,      // 21
-	KEY_X,      // 22
-	KEY_D,      // 23
-	KEY_E,      // 24
-	KEY_4,      // 25
-	KEY_3,      // 26
-	KEY_NONE,   // 27
-	KEY_NONE,   // 28
-	KEY_SPACE,  // 29
-	KEY_V,      // 2A
-	KEY_F,      // 2B
-	KEY_T,      // 2C
-	KEY_R,      // 2D
-	KEY_5,      // 2E
-	KEY_NONE,   // 2F
-	KEY_NONE,   // 30
-	KEY_N,      // 31
-	KEY_B,      // 32
-	KEY_H,      // 33
-	KEY_G,      // 34
-	KEY_Y,      // 35
-	KEY_6,      // 36
-	KEY_NONE,   // 37
-	KEY_NONE,   // 38
-	KEY_NONE,   // 39
-	KEY_M,      // 3A
-	KEY_J,      // 3B
-	KEY_U,      // 3C
-	KEY_7,      // 3D
-	KEY_8,      // 3E
-	KEY_NONE,   // 3F
-	KEY_NONE,   // 40
-	KEY_COMMA,  // 41
-	KEY_K,      // 42
-	KEY_I,      // 43
-	KEY_O,      // 44
-	KEY_0,      // 45
-	KEY_9,      // 46
-	KEY_NONE,   // 47
-	KEY_NONE,   // 48
-	KEY_PERIOD, // 49
-	KEY_SLASH,  // 4A
-	KEY_L,      // 4B
-	KEY_SEMI,   // 4C
-	KEY_P,      // 4D
-	KEY_MINUS,  // 4E
-	KEY_NONE,   // 4F
-	KEY_NONE,   // 50
-	KEY_NONE,   // 51
-	KEY_SQT,    // 52
-	KEY_NONE,   // 53
-	KEY_LBRAC,  // 54
-	KEY_EQUALS, // 55
-	KEY_NONE,   // 56
-	KEY_NONE,   // 57
+	KEY_NONE,    // 00
+	KEY_F9,      // 01
+	KEY_NONE,    // 02
+	KEY_F5,      // 03
+	KEY_F3,      // 04
+	KEY_F1,      // 05
+	KEY_F2,      // 06
+	KEY_F12,     // 07
+	KEY_NONE,    // 08
+	KEY_F10,     // 09
+	KEY_F8,      // 0A
+	KEY_F6,      // 0B
+	KEY_F4,      // 0C
+	KEY_TAB,     // 0D
+	KEY_TILDE,   // 0E
+	KEY_NONE,    // 0F
+	KEY_NONE,    // 10
+	KEY_LALT,    // 11
+	KEY_LSHIFT,  // 12
+	KEY_NONE,    // 13
+	KEY_LCTRL,   // 14
+	KEY_Q,       // 15
+	KEY_1,       // 16
+	KEY_NONE,    // 17
+	KEY_NONE,    // 18
+	KEY_NONE,    // 19
+	KEY_Z,       // 1A
+	KEY_S,       // 1B
+	KEY_A,       // 1C
+	KEY_W,       // 1D
+	KEY_2,       // 1E
+	KEY_NONE,    // 1F
+	KEY_NONE,    // 20
+	KEY_C,       // 21
+	KEY_X,       // 22
+	KEY_D,       // 23
+	KEY_E,       // 24
+	KEY_4,       // 25
+	KEY_3,       // 26
+	KEY_NONE,    // 27
+	KEY_NONE,    // 28
+	KEY_SPACE,   // 29
+	KEY_V,       // 2A
+	KEY_F,       // 2B
+	KEY_T,       // 2C
+	KEY_R,       // 2D
+	KEY_5,       // 2E
+	KEY_NONE,    // 2F
+	KEY_NONE,    // 30
+	KEY_N,       // 31
+	KEY_B,       // 32
+	KEY_H,       // 33
+	KEY_G,       // 34
+	KEY_Y,       // 35
+	KEY_6,       // 36
+	KEY_NONE,    // 37
+	KEY_NONE,    // 38
+	KEY_NONE,    // 39
+	KEY_M,       // 3A
+	KEY_J,       // 3B
+	KEY_U,       // 3C
+	KEY_7,       // 3D
+	KEY_8,       // 3E
+	KEY_NONE,    // 3F
+	KEY_NONE,    // 40
+	KEY_COMMA,   // 41
+	KEY_K,       // 42
+	KEY_I,       // 43
+	KEY_O,       // 44
+	KEY_0,       // 45
+	KEY_9,       // 46
+	KEY_NONE,    // 47
+	KEY_NONE,    // 48
+	KEY_PERIOD,  // 49
+	KEY_SLASH,   // 4A
+	KEY_L,       // 4B
+	KEY_SEMI,    // 4C
+	KEY_P,       // 4D
+	KEY_MINUS,   // 4E
+	KEY_NONE,    // 4F
+	KEY_NONE,    // 50
+	KEY_NONE,    // 51
+	KEY_SQT,     // 52
+	KEY_NONE,    // 53
+	KEY_LBRAC,   // 54
+	KEY_EQUALS,  // 55
+	KEY_NONE,    // 56
+	KEY_NONE,    // 57
 	KEY_CAPSLOCK,// 58
-	KEY_RSHIFT, // 59
-	KEY_ENTER,  // 5A
-	KEY_RBRAC,  // 5B
-	KEY_NONE,   // 5C
-	KEY_BACKSL, // 5D
-	KEY_NONE,   // 5E
-	KEY_NONE,   // 5F
-	KEY_NONE,   // 60
-	KEY_NONE,   // 61
-	KEY_NONE,   // 62
-	KEY_NONE,   // 63
-	KEY_NONE,   // 64
-	KEY_NONE,   // 65
-	KEY_BACKSP, // 66
-	KEY_NONE,   // 67
-	KEY_NONE,   // 68
-	KEY_NUM1,   // 69
-	KEY_NONE,   // 6A
-	KEY_NUM4,   // 6B
-	KEY_NUM7,   // 6C
-	KEY_NONE,   // 6D
-	KEY_NONE,   // 6E
-	KEY_NONE,   // 6F
-	KEY_NUM0,   // 70
-	KEY_NUMPER, // 71
-	KEY_NUM2,   // 72
-	KEY_NUM5,   // 73
-	KEY_NUM6,   // 74
-	KEY_NUM8,   // 75
-	KEY_ESC,    // 76
-	KEY_NUMLOCK,// 77
-	KEY_F11,    // 78
-	KEY_NUMPLUS,// 79
-	KEY_NUM3,   // 7A
+	KEY_RSHIFT,  // 59
+	KEY_ENTER,   // 5A
+	KEY_RBRAC,   // 5B
+	KEY_NONE,    // 5C
+	KEY_BACKSL,  // 5D
+	KEY_NONE,    // 5E
+	KEY_NONE,    // 5F
+	KEY_NONE,    // 60
+	KEY_NONE,    // 61
+	KEY_NONE,    // 62
+	KEY_NONE,    // 63
+	KEY_NONE,    // 64
+	KEY_NONE,    // 65
+	KEY_BACKSP,  // 66
+	KEY_NONE,    // 67
+	KEY_NONE,    // 68
+	KEY_NUM1,    // 69
+	KEY_NONE,    // 6A
+	KEY_NUM4,    // 6B
+	KEY_NUM7,    // 6C
+	KEY_NONE,    // 6D
+	KEY_NONE,    // 6E
+	KEY_NONE,    // 6F
+	KEY_NUM0,    // 70
+	KEY_NUMPER,  // 71
+	KEY_NUM2,    // 72
+	KEY_NUM5,    // 73
+	KEY_NUM6,    // 74
+	KEY_NUM8,    // 75
+	KEY_ESC,     // 76
+	KEY_NUMLOCK, // 77
+	KEY_F11,     // 78
+	KEY_NUMPLUS, // 79
+	KEY_NUM3,    // 7A
 	KEY_NUMMINUS,// 7B
-	KEY_NUMAST, // 7C
-	KEY_NUM9,   // 7D
-	KEY_SCROLLC,// 7E
-	KEY_NONE,   // 7F
-	KEY_NONE,   // 80
-	KEY_NONE,   // 81
-	KEY_NONE,   // 82
-	KEY_F7,     // 83
-	KEY_NONE,   // 84
+	KEY_NUMAST,  // 7C
+	KEY_NUM9,    // 7D
+	KEY_SCROLLC, // 7E
+	KEY_NONE,    // 7F
+	KEY_NONE,    // 80
+	KEY_NONE,    // 81
+	KEY_NONE,    // 82
+	KEY_F7,      // 83
+	KEY_NONE,    // 84
 };
 
 uint8_t
@@ -507,7 +507,7 @@ Keyboard::read()
 		return result + cc;
 	}
 	result += pgm_read_byte(scancodes1+c);
-	
+
 	return result;
 }
 
@@ -520,7 +520,7 @@ void
 Keyboard::attachInterrupt()
 {
 	irq_num = 255;
-	
+
 #ifdef CORE_INT_EVERY_PIN
 	irq_num = ClockPin;
 
@@ -649,19 +649,20 @@ Keyboard::attachInterrupt()
 	}
 #endif
 
-	if (irq_num < 255) {
+	if (irq_num < 255)
 		::attachInterrupt(irq_num, ps2interrupt, FALLING);
-	}
 }
 
 void
-Keyboard::begin(uint8_t data_pin, uint8_t irq_pin)
+Keyboard::begin(
+    uint8_t data_pin,
+    uint8_t irq_pin)
 {
 	DataPin = data_pin;
 	ClockPin = irq_pin;
 
 	this->sendByte(0xFF);
-	delay(50);	
+	delay(50);
 	
 	setOutput();
 	this->attachInterrupt();

@@ -6,7 +6,7 @@
  ** Mostly rewritten Paul Stoffregen <paul@pjrc.com>, June 2010
  ** Modified for use with Arduino 13 by L. Abraham Smith, <n3bah@microcompdesign.com> * 
  ** Modified for easy interrup pin assignement on method begin(datapin,irq_pin). Cuningan <cuninganreset@gmail.com> **
- ** Modified by Andrey V. Skvortsov 2019: Library main object reads only the scan
+ ** Modified by Andrey V. Skvortsov 2019-2021: Library main object reads only the scan
  *    codes, needs to use external scan-code to char-code parser library
 
   This library is free software; you can redistribute it and/or
@@ -39,11 +39,11 @@ namespace PS2
 class KeyboardStream : public Stream
 {
 public:
-	
+
 	KeyboardStream(Keyboard&);
-	
+
 private:
-	
+
 	enum Flags_t : uint8_t
 	{
 		FLAGS_NONE = 0,
@@ -54,38 +54,38 @@ private:
 		FLAGS_NUM = 1 << 4,
 		FLAGS_LOCALE = 1 << 5,
 	};
-	
+
 	void getScanCodes();
-	
+
 	void getScanCode();
-	
+
 	uint8_t getChar();
-	
+
 	void updateLeds();
-	
+
 	Flags_t m_flags;
-	
+
 	Keyboard& m_boundary;
-	
+
 	uint8_t m_charBuffer[PS2_KSTREAM_BUFFER_SIZE];
-	
+
 	uint8_t m_head, m_tail;
-	
+
 	uint8_t m_lastChar;
 
 // Stream cinterface
 public:
-	
+
 	int available() override;
-	
+
 	int read() override;
-	
+
 	int peek() override;
-	
+
 	void flush() override;
 // Print interface
 public:
-	
+
 	size_t write(uint8_t);
 };
 

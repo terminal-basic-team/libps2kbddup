@@ -6,7 +6,7 @@
  ** Mostly rewritten Paul Stoffregen <paul@pjrc.com>, June 2010
  ** Modified for use with Arduino 13 by L. Abraham Smith, <n3bah@microcompdesign.com> * 
  ** Modified for easy interrup pin assignement on method begin(datapin,irq_pin). Cuningan <cuninganreset@gmail.com> **
- ** Modified by Andrey V. Skvortsov 2019: Library main object reads only the scan
+ ** Modified by Andrey V. Skvortsov 2019-2021: Library main object reads only the scan
  *    codes, needs to use external scan-code to char-code parser library
 
   This library is free software; you can redistribute it and/or
@@ -42,6 +42,9 @@
 namespace PS2
 {
 
+/**
+ * Phisical keys
+ */
 enum Keys : uint8_t
 {
 	KEY_NONE = 0,
@@ -141,14 +144,15 @@ enum Keys : uint8_t
 
 /**
  * Purpose: Provides an easy access to PS2 keyboards
- * Author:  Christian Weichel
+ * @author  Christian Weichel
+ * @author Andrey Skvortsov
  */
 class Keyboard
 {
 	friend class KeyboardStream;
 public:
 	/**
-	 * This constructor does basically nothing. Please call the begin(int,int)
+	 * This constructor does basically nothing. Please call the begin(dataPin, irqPin)
 	 * method before using any other method of this class.
 	 */
 	Keyboard();
@@ -166,7 +170,7 @@ public:
 	    uint8_t);
 
 	/**
-	 * Returns true if there is a char to be read, false if not.
+	 * Returns true if there is a key event to be read, false if not.
 	 */
 	bool available();
 

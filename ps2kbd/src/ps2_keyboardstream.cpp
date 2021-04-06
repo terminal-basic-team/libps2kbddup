@@ -6,7 +6,7 @@
  ** Mostly rewritten Paul Stoffregen <paul@pjrc.com>, June 2010
  ** Modified for use with Arduino 13 by L. Abraham Smith, <n3bah@microcompdesign.com> * 
  ** Modified for easy interrup pin assignement on method begin(datapin,irq_pin). Cuningan <cuninganreset@gmail.com> **
- ** Modified by Andrey V. Skvortsov 2019: Library main object reads only the scan
+ ** Modified by Andrey V. Skvortsov 2019-2021: Library main object reads only the scan
  *    codes, needs to use external scan-code to char-code parser library
 
   This library is free software; you can redistribute it and/or
@@ -99,6 +99,56 @@ KeyboardStream::updateLeds()
 	m_boundary.setLeds(byt);
 }
 
+static const uint8_t asciiChars_upper[] PROGMEM
+{
+	'~',  // KEY_TILDE
+	'?',  // KEY_SLASH
+	'|',  // KEY_BACKSL
+	'>',  // KEY_PERIOD
+	':',  // KEY_SEMI
+	'<',  // KEY_COMMA
+	'"',  // KEY_SQT
+	'_',  // KEY_MINUS
+	'+',  // KEY_EQUALS
+	'{',  // KEY_LBRAC
+	'}',  // KEY_RBRAC
+	')',  // KEY_0
+	'!',  // KEY_1
+	'@',  // KEY_2
+	'#',  // KEY_3
+	'$',  // KEY_4
+	'%',  // KEY_5
+	'^',  // KEY_6
+	'&',  // KEY_7
+	'*',  // KEY_8
+	'(',  // KEY_9
+	'A',  // KEY_A
+	'B',  // KEY_B
+	'C',  // KEY_C
+	'D',  // KEY_D
+	'E',  // KEY_E
+	'F',  // KEY_F
+	'G',  // KEY_G
+	'H',  // KEY_H
+	'I',  // KEY_I
+	'J',  // KEY_J
+	'K',  // KEY_K
+	'L',  // KEY_L
+	'M',  // KEY_M
+	'N',  // KEY_N
+	'O',  // KEY_O
+	'P',  // KEY_P
+	'Q',  // KEY_Q
+	'R',  // KEY_R
+	'S',  // KEY_S
+	'T',  // KEY_T
+	'U',  // KEY_U
+	'V',  // KEY_V
+	'W',  // KEY_W
+	'X',  // KEY_X
+	'Y',  // KEY_Y
+	'Z',  // KEY_Z
+};
 
 static const uint8_t asciiChars_lower[] PROGMEM
 {
@@ -253,71 +303,20 @@ static const uint8_t lowCase_cp866[] PROGMEM
 	'ï',  // KEY_Z
 };
 
-static const uint8_t cp866caps[] PROGMEM
+static const uint8_t asciicaps[] PROGMEM
 {
-	0b01111001,
-	0b00000110,
+	0b00000000,
+	0b00000000,
 	0b11100000,
 	0b11111111,
 	0b11111111,
 	0b11111111
 };
 
-static const uint8_t asciiChars_upper[] PROGMEM
+static const uint8_t cp866caps[] PROGMEM
 {
-	'~',  // KEY_TILDE
-	'?',  // KEY_SLASH
-	'|',  // KEY_BACKSL
-	'>',  // KEY_PERIOD
-	':',  // KEY_SEMI
-	'<',  // KEY_COMMA
-	'"',  // KEY_SQT
-	'_',  // KEY_MINUS
-	'+',  // KEY_EQUALS
-	'{',  // KEY_LBRAC
-	'}',  // KEY_RBRAC
-	')',  // KEY_0
-	'!',  // KEY_1
-	'@',  // KEY_2
-	'#',  // KEY_3
-	'$',  // KEY_4
-	'%',  // KEY_5
-	'^',  // KEY_6
-	'&',  // KEY_7
-	'*',  // KEY_8
-	'(',  // KEY_9
-	'A',  // KEY_A
-	'B',  // KEY_B
-	'C',  // KEY_C
-	'D',  // KEY_D
-	'E',  // KEY_E
-	'F',  // KEY_F
-	'G',  // KEY_G
-	'H',  // KEY_H
-	'I',  // KEY_I
-	'J',  // KEY_J
-	'K',  // KEY_K
-	'L',  // KEY_L
-	'M',  // KEY_M
-	'N',  // KEY_N
-	'O',  // KEY_O
-	'P',  // KEY_P
-	'Q',  // KEY_Q
-	'R',  // KEY_R
-	'S',  // KEY_S
-	'T',  // KEY_T
-	'U',  // KEY_U
-	'V',  // KEY_V
-	'W',  // KEY_W
-	'X',  // KEY_X
-	'Y',  // KEY_Y
-	'Z',  // KEY_Z
-};
-
-static const uint8_t asciicaps[] PROGMEM
-{
-	0b00000000,
-	0b00000000,
+	0b01111001,
+	0b00000110,
 	0b11100000,
 	0b11111111,
 	0b11111111,
